@@ -11,13 +11,11 @@ class Board extends StatefulWidget {
 
 class _Board extends State<Board> {
   TicTacToe ticTacToe;
-  Color scoreColor;
   Color winningColor;
 
 
   _Board() {
     ticTacToe = TicTacToe();
-    scoreColor = Colors.blue;
     winningColor = Colors.purple;
   }
 
@@ -32,24 +30,22 @@ class _Board extends State<Board> {
 
   void clicked(int index) {
     if (ticTacToe.choose(index)) {
-      scoreColor = Colors.green;
-    }
-    else {
-      scoreColor = Colors.red;
+
+      // compute the next move
+      Future.delayed(const Duration(milliseconds: 100), () {
+        ticTacToe.computerMove();
+        _refreshGUI();
+      });
     }
 
     _refreshGUI();
-    Future.delayed(const Duration(milliseconds: 100), () {
-      ticTacToe.computerMove();
-      _refreshGUI();
-    });
   }
 
   Text getText(String text) {
     return Text(text,
                 style: TextStyle(
                     fontSize: 25, 
-                    color: scoreColor),
+                    color: Colors.green),
           );
   }
 
@@ -90,21 +86,27 @@ class _Board extends State<Board> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
-                Text("EASY"),
+                Text("Easy"),
                 Radio(
                   value: Mode.EASY,
                   groupValue: ticTacToe.mode,
                   onChanged: radioButtonSelected,
                 ),                
-                Text("MEDIUM"),
+                Text("Medium"),
                 Radio(
                   value: Mode.MEDIUM,
                   groupValue: ticTacToe.mode,
                   onChanged: radioButtonSelected,
                 ),
-                Text("HARD"),
+                Text("Hard"),
                 Radio(
                   value: Mode.HARD,
+                  groupValue: ticTacToe.mode,
+                  onChanged: radioButtonSelected,
+                ),
+                Text("Very Hard"),
+                Radio(
+                  value: Mode.VERY_HARD,
                   groupValue: ticTacToe.mode,
                   onChanged: radioButtonSelected,
                 ),
