@@ -86,10 +86,7 @@ class TicTacToe {
 
   void playNextMove() {
     if (mode == Mode.VERY_HARD) {
-      // do something
-      // Map tmpBoard = clone(board);
-
-      List tmp = getBestScore(board, Player.COMPUTER);
+      List tmp = getBestScore(board, Player.COMPUTER, getDepth(board));
       int score = tmp[0];
       int move = tmp[1];
 
@@ -186,19 +183,31 @@ class TicTacToe {
     }
   }
 
-  List getBestScore(newBoard, Player _player) {
-    // int depth = getDepth(board);
-    int score = -2;
+  List getBestScore(newBoard, Player _player, int depth) {
+    const int INFINITY = 99;
+    int score = -INFINITY;
+    
+    if (_player == Player.PERSON) {
+      score = INFINITY;
+    }
 
     int move = -1;
 
     // check if the board is won?
-    if (playerWon(otherPlayer(_player), newBoard)) {
+    if (playerWon(Player.COMPUTER, newBoard)) {
       // game over
+      if (depth > 6) {
+        print('won');
+        print(newBoard);
+      }
       return [1, null];
     }
-    else if (playerWon(_player, newBoard)) {
+    else if (playerWon(Player.PERSON, newBoard)) {
       // game over
+      if (depth > 6) {
+        print('loss');
+        print(newBoard);
+      }
       return [-1, null];
     } 
     else if (!nextMovePossible(newBoard)) {
@@ -210,16 +219,24 @@ class TicTacToe {
       if (board[i] == Player.NONE) { // check for available moves
         newBoard[i] = _player;
 
-        List tmp = getBestScore(newBoard, otherPlayer(_player));
-        int scoreForTheMove = -1*tmp[0];
+        List tmp = getBestScore(newBoard, otherPlayer(_player), depth);
+        int scoreForTheMove = tmp[0];
 
-        // if ( depth > 7) {
-        //   print("depth $depth index $i score $scoreForTheMove $_player");
-        // }
+        if ( depth > 5) {
+          print("depth $depth index $i score $scoreForTheMove $_player");
+        }
 
-        if (scoreForTheMove > score) {
-          move = i;
-          score = scoreForTheMove;
+        if(_player == Player.COMPUTER) {
+          if (scoreForTheMove > score) {
+            move = i;
+            score = scoreForTheMove;
+          }
+        }
+        else {
+          if (scoreForTheMove < score) {
+            move = i;
+            score = scoreForTheMove;
+          }
         }
         newBoard[i] = Player.NONE;
       }
