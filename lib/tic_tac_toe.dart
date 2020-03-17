@@ -186,7 +186,7 @@ class TicTacToe {
   List getBestScore(newBoard, Player _player, int depth) {
     const int INFINITY = 99;
     int score = -INFINITY;
-    
+
     if (_player == Player.PERSON) {
       score = INFINITY;
     }
@@ -196,18 +196,10 @@ class TicTacToe {
     // check if the board is won?
     if (playerWon(Player.COMPUTER, newBoard)) {
       // game over
-      if (depth > 6) {
-        print('won');
-        print(newBoard);
-      }
       return [1, null];
     }
     else if (playerWon(Player.PERSON, newBoard)) {
       // game over
-      if (depth > 6) {
-        print('loss');
-        print(newBoard);
-      }
       return [-1, null];
     } 
     else if (!nextMovePossible(newBoard)) {
@@ -221,10 +213,6 @@ class TicTacToe {
 
         List tmp = getBestScore(newBoard, otherPlayer(_player), depth);
         int scoreForTheMove = tmp[0];
-
-        if ( depth > 5) {
-          print("depth $depth index $i score $scoreForTheMove $_player");
-        }
 
         if(_player == Player.COMPUTER) {
           if (scoreForTheMove > score) {
