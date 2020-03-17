@@ -1,7 +1,6 @@
 import 'dart:math';
-
-enum Mode {EASY, MEDIUM, HARD}
-enum Player {NONE, PERSON, COMPUTER}
+import 'definitions.dart';
+import 'tic_tac_toe_logic.dart';
 
 class TicTacToe {
   Map board;
@@ -11,22 +10,13 @@ class TicTacToe {
   Player player;
   Mode mode;
   String message;
-  var winningMoves;
   var winningCombination;
 
+  // setting up the board
   TicTacToe() {
     board = new Map();
-    winningMoves = [];
     reset();
 
-    winningMoves.add([1, 2, 3]);
-    winningMoves.add([4, 5, 6]);
-    winningMoves.add([7, 8, 9]);
-    winningMoves.add([1, 4, 7]);
-    winningMoves.add([2, 5, 8]);
-    winningMoves.add([3, 6, 9]);
-    winningMoves.add([1, 5, 9]);
-    winningMoves.add([3, 5, 7]);
   }
 
   void reset() {
@@ -52,28 +42,18 @@ class TicTacToe {
     player = otherPlayer(player);
   }
 
-  Player otherPlayer(Player _player) {
-    if (_player == Player.PERSON) {
-      return Player.COMPUTER;
-    }
-    else if (_player == Player.COMPUTER) {
-      return Player.PERSON;
-    }
-
-    return Player.NONE;
-  }
-
   Player getPlayerFromIndex(int index){
     return board[index];
   }
 
   bool blockOther() {
     int index;
-    
+    List winningMoveList = winningMoves();
+
     // check different combinations for winning
-    for (int loop = 0; loop < winningMoves.length; ++loop) {
-      var moves = winningMoves[loop];
-      index = isGameGoingTobeWonBy(moves, player);
+    for (int loop = 0; loop < winningMoveList.length; ++loop) {
+      var moves = winningMoveList[loop];
+      index = isGameGoingTobeWonBy(moves, player, board);
       if (index != -1) {
         setMove(index);
         break;
@@ -85,11 +65,12 @@ class TicTacToe {
 
   bool playWin() {
     int index;
+    List winningMoveList = winningMoves();
     
     // check different combinations for winning
-    for (int loop = 0; loop < winningMoves.length; ++loop) {
-      var moves = winningMoves[loop];
-      index = isGameGoingTobeWonBy(moves, otherPlayer(player));
+    for (int loop = 0; loop < winningMoveList.length; ++loop) {
+      var moves = winningMoveList[loop];
+      index = isGameGoingTobeWonBy(moves, otherPlayer(player), board);
       if (index != -1) {
         setMove(index);
         break;
@@ -104,11 +85,20 @@ class TicTacToe {
   }
 
   void playNextMove() {
-    var available = [];
+    if (mode == Mode.VERY_HARD) {
+      // do something
+      // Map tmpBoard = clone(board);
 
-    for (int i = 1; i < 10; ++i) {
-      if (board[i] == Player.NONE)
-        available.add(i);
+      List tmp = getBestScore(board, Player.COMPUTER);
+      int score = tmp[0];
+      int move = tmp[1];
+
+      print(" score is $score , $move");
+
+      if (move != null) {
+        setMove(move);
+        return;
+      }
     }
 
     if (mode == Mode.HARD) {
@@ -125,97 +115,40 @@ class TicTacToe {
       }
     }
 
+    var available = [];
+
+    for (int i = 1; i < 10; ++i) {
+      if (board[i] == Player.NONE)
+        available.add(i);
+    }
+
     int random = Random().nextInt(available.length);
     setMove(available[random]);
 
     return;
   }
 
-  int getCountForIndex(int index, Player _player) {
-    if (board[index] == _player) {
-      return 1;
-    } 
-    else if (board[index] == otherPlayer(_player)) {
-      return -1;
-    }
-    return 0;
-  }
-
-  bool isGameWonByPlayer( var indexes, Player _player) {
-    int count = 0;
-    for (int loop = 0; loop < indexes.length; ++loop) {
-      count += getCountForIndex(indexes[loop], _player);
-    }
-    
-    if (count == 3) {
-      winningCombination = indexes;
-    }
-
-    return count == 3;
-  }
-
-  int isGameGoingTobeWonBy( var indexes, Player _player) {
-    _player = otherPlayer(_player);
-
-    int count = 0;
-    int index = -1;
-
-    for (int loop = 0; loop < indexes.length; ++loop) {
-      int x = getCountForIndex(indexes[loop], _player);
-      count += x;
-      if (x == 0) {
-        index = indexes[loop];
-      }
-    }
-
-    if (count != 2) {
-      index = -1;
-    }
-    
-    return index;
-  }
-
-  bool playerWon(Player _player) {
-    bool flag = false;
-
-    // check different combinations for winning
-    for (int loop = 0; loop < winningMoves.length; ++loop) {
-      var moves = winningMoves[loop];
-      if (isGameWonByPlayer(moves, _player)) {
-        flag = true;
-        break;
-      }
-    }
-
-    return flag;
-  }
-
-  bool nextMovePossible() {
-    for (int i = 1; i < 10; ++i) {
-      if (board[i] == Player.NONE)
-        return true;
-    }
-
-    return false;
-  }
-
   bool isGameOver() {
     bool check = false;
     // check if game over
-    if (playerWon(Player.PERSON)) {
+    if (playerWon(Player.PERSON, board)) {
       message = "Game over! Congratulations! You Won!!!";
       ++scorePlayer;
       check = true;
     }
-    else if(playerWon(Player.COMPUTER)) {
+    else if(playerWon(Player.COMPUTER, board)) {
       ++scoreComputer;
       message = "Game over! Computer Won.";
       check = true;
     }
-    else if (!nextMovePossible()){
+    else if (!nextMovePossible(board)){
       ++scoreDraw;
       message = "Game over! Game drawn.";
       check = true;
+    }
+
+    if (check) {
+      winningCombination = getWinningCombination(board);
     }
 
     return check;
@@ -224,9 +157,9 @@ class TicTacToe {
   bool choose(index){
     bool flag = true;
 
-    if (playerWon(Player.COMPUTER) 
-        || playerWon(Player.PERSON) 
-        || !nextMovePossible()) {
+    if (playerWon(Player.COMPUTER, board) 
+        || playerWon(Player.PERSON, board) 
+        || !nextMovePossible(board)) {
           // game over, nothing to do
       return false;
     }
@@ -251,5 +184,51 @@ class TicTacToe {
         switchPlayer(); // switch back to user
       }
     }
+  }
+
+  List getBestScore(newBoard, Player _player) {
+    // int depth = getDepth(board);
+    int score = -2;
+
+    int move = -1;
+
+    // check if the board is won?
+    if (playerWon(otherPlayer(_player), newBoard)) {
+      // game over
+      return [1, null];
+    }
+    else if (playerWon(_player, newBoard)) {
+      // game over
+      return [-1, null];
+    } 
+    else if (!nextMovePossible(newBoard)) {
+      // game drawn
+      return [0, null];
+    }
+
+    for (int i = 1; i < 10; ++i) {
+      if (board[i] == Player.NONE) { // check for available moves
+        newBoard[i] = _player;
+
+        List tmp = getBestScore(newBoard, otherPlayer(_player));
+        int scoreForTheMove = -1*tmp[0];
+
+        // if ( depth > 7) {
+        //   print("depth $depth index $i score $scoreForTheMove $_player");
+        // }
+
+        if (scoreForTheMove > score) {
+          move = i;
+          score = scoreForTheMove;
+        }
+        newBoard[i] = Player.NONE;
+      }
+    }
+
+    if (move == -1) {
+      return [0, null]; // no move draw
+    }
+
+    return [score, move];
   }
 }

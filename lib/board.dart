@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'board_button.dart';
 import 'tic_tac_toe.dart';
+import 'new_game_button.dart';
+import 'definitions.dart';
+import 'mode_drop_down.dart';
 
 class Board extends StatefulWidget {
   @override
@@ -57,9 +60,9 @@ class _Board extends State<Board> {
           );
   }
 
-  void radioButtonSelected(value) {
-    _refreshGUI();
+  void onModeChange(Mode value) {
     ticTacToe.mode = value;
+    _refreshGUI();
   }
 
   @override
@@ -68,7 +71,6 @@ class _Board extends State<Board> {
     int scorePlayer = ticTacToe.scorePlayer;
     int scoreDraw = ticTacToe.scoreDraw;
     int scoreComputer = ticTacToe.scoreComputer;
-
     return 
         Column(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -76,42 +78,23 @@ class _Board extends State<Board> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
-                getText("YOU: $scorePlayer"),
-                getText("DRAW: $scoreDraw"),
-                getText("COMPUTER: $scoreComputer"),
+                getText("YOU: $scorePlayer DRAW: $scoreDraw, COMPUTER: $scoreComputer"),
+              ],
+            ),
+            SizedBox(height: heightPadding,),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: <Widget>[
+                Text("Select Mode",
+                  style: TextStyle(
+                    color: Colors.blue,
+                    fontSize: 20),
+                ),                
+                ModeDropDown(onModeChange),
               ],
             ),
             SizedBox(height: heightPadding,),
             diplayMessage(ticTacToe.message),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: <Widget>[
-                Text("Easy"),
-                Radio(
-                  value: Mode.EASY,
-                  groupValue: ticTacToe.mode,
-                  onChanged: radioButtonSelected,
-                ),                
-                Text("Medium"),
-                Radio(
-                  value: Mode.MEDIUM,
-                  groupValue: ticTacToe.mode,
-                  onChanged: radioButtonSelected,
-                ),
-                Text("Hard"),
-                Radio(
-                  value: Mode.HARD,
-                  groupValue: ticTacToe.mode,
-                  onChanged: radioButtonSelected,
-                ),
-                Text("Very Hard"),
-                Radio(
-                  value: Mode.VERY_HARD,
-                  groupValue: ticTacToe.mode,
-                  onChanged: radioButtonSelected,
-                ),
-              ],
-            ),
             Spacer(flex: 2,),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -140,19 +123,7 @@ class _Board extends State<Board> {
               ],
             ),
             SizedBox(height: heightPadding,),
-            FlatButton(
-                  color: Colors.teal,
-                  child: Text("New Game",
-                          style: TextStyle(
-                                  fontSize: 30,
-                                  color: Colors.white,
-                                  ),
-                          ),
-                  shape: RoundedRectangleBorder(
-                          borderRadius: new BorderRadius.circular(18.0),
-                          ),                    
-                  onPressed: newGame,
-            ),
+            NewGameButton(newGame),
             SizedBox(height: heightPadding,),
           ],
         );

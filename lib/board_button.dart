@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'definitions.dart';
 import 'tic_tac_toe.dart';
 
 class BoardButton extends StatelessWidget {
